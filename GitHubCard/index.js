@@ -3,19 +3,57 @@
            https://api.github.com/users/<your name>
 */
 
-axios.get("https://api.github.com/users/SilverMaiden")
-           .then(response => {
-               let myComponent = createComponent(response);
-               let cards = document.querySelector('.cards');
-               cards.appendChild(myComponent);
+
+function createCard(input) {
+   let myComponent = createComponent(input);
+   let cards = document.querySelector('.cards');
+   cards.appendChild(myComponent);
+
+}
 
 
-           });
+function getFollowers(response) {
+    let arr = [];
+    response.data.forEach(element => {
+        arr.push(element.login)
+    })
+    return arr;
+}
+
+
+function getUserProfiles(username) {
+    axios.get(`https://api.github.com/users/${username}`)
+               .then((response) => {
+                   createCard(response);
+                   return axios.get(`https://api.github.com/users/${username}/followers`);
+               })
+               .then((response) => {
+                   let followers = getFollowers(response);
+                   followers.forEach(element => {
+                       axios.get(`https://api.github.com/users/${element}`)
+                       .then(response => {
+                           createCard(response);
+                       })
+                   })
+               })
+
+}
+
+getUserProfiles("SilverMaiden");
+
+
+
 
 
 /* Step 2: Inspect and study the data coming back, this is YOUR
    github info! You will need to understand the structure of this
    data in order to use it to build your component function
+                       .then(response => {
+                           let myComponent = createComponent(response);
+                           console.log(response.data.followers);
+                           let cards = document.querySelector('.cards');
+                           cards.appendChild(myComponent);
+                       })})})};
 
    Skip to Step 3.
 */
@@ -34,17 +72,11 @@ axios.get("https://api.github.com/users/SilverMaiden")
           user, and adding that card to the DOM.
 */
 
-const followersArray = ["tetondan", "dustinmyers", "justsml", "luishrd", "bigknell"];
+const followersArray = ["tetondan", "dustinmyers"];
 
 followersArray.forEach(element => {
-    axios.get(`https://api.github.com/users/${element}`)
-               .then(response => {
-                   let myComponent = createComponent(response);
-                   let cards = document.querySelector('.cards');
-                   cards.appendChild(myComponent);
-               });
-
-
+    console.log(element);
+    getUserProfiles(element);
 })
 
 /* Step 3: Create a function that accepts a single object as its only argument,
@@ -66,6 +98,7 @@ followersArray.forEach(element => {
 </div>
 
 */
+
 
 function createComponent(object) {
     //Creating containing div with class Card
